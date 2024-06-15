@@ -1,13 +1,20 @@
 "use client";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/app/components/ui/navbar/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useProfile from "@/app/hooks/useProfile";
-// Asegúrate de que la ruta sea correcta
+import { useRouter } from "next/navigation";
+import { navItem } from "./data";
+import NavbarItem from "./navbarItem";
+import NavbarItemMobile from "./navbarItemMobile";
 
 const Navbar = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -20,6 +27,8 @@ const Navbar = () => {
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
+
+  // Manejar el cierre del menú de usuario cuando se hace clic fuera de él
 
   return (
     <nav className="relative z-10 bg-white shadow-md flex justify-between items-center p-4">
@@ -44,51 +53,42 @@ const Navbar = () => {
           </svg>
         </button>
         <ul className="hidden md:flex p-4 space-x-4">
-          <li>
-            <Link
-              href="/"
-              className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/about"
-              className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-            >
-              About
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/services"
-              className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-            >
-              Services
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/contact"
-              className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-            >
-              Contact
-            </Link>
-          </li>
+          {navItem.map((item, index) => (
+            <NavbarItem key={index} href={item.href} page={item.page} />
+          ))}
         </ul>
       </div>
-      <div className="relative">
-        <button onClick={toggleUserMenu} className="focus:outline-none">
-          <Avatar>
-            {session ? (
+      <div className="flex items-center space-x-4">
+        {session ? (
+          <button
+            onClick={toggleUserMenu}
+            className="text-gray-700 focus:outline-none avatar-button"
+          >
+            <Avatar>
               <AvatarImage src={profile?.profile?.avatarUrl} />
-            ) : (
-              <AvatarImage src="" />
-            )}
-            <AvatarFallback></AvatarFallback>
-          </Avatar>
-        </button>
+              <AvatarFallback></AvatarFallback>
+            </Avatar>
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => signIn()}
+              className="px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-700"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={
+                () => {
+                  router.push("/auth/register");
+                } /* Handle Sign Up */
+              }
+              className="px-3 py-2 rounded-md text-sm text-white bg-blue-500 hover:bg-blue-600"
+            >
+              Sign Up
+            </button>
+          </>
+        )}
         <AnimatePresence>
           {isUserMenuOpen && (
             <motion.div
@@ -96,16 +96,16 @@ const Navbar = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-20"
+              className="absolute top-20 right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-20"
             >
               {session ? (
                 <>
-                  <Link
-                    href="/profile"
+                  <button
+                    onClick={() => router.push("/profile")}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Perfil
-                  </Link>
+                    Profile
+                  </button>
                   <button
                     onClick={() => signOut()}
                     className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-100"
@@ -135,38 +135,29 @@ const Navbar = () => {
             className="absolute top-16 left-0 w-full bg-white shadow-lg p-4 md:hidden"
           >
             <ul className="space-y-4">
-              <li>
-                <Link
-                  href="/"
-                  className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/services"
-                  className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-                >
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-700"
-                >
-                  Contact
-                </Link>
-              </li>
+              {navItem.map((item, index) => (
+                <NavbarItemMobile
+                  key={index}
+                  href={item.href}
+                  page={item.page}
+                />
+              ))}
+              {!session && (
+                <>
+                  <button
+                    onClick={() => signIn()}
+                    className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-700"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {} /* Handle Sign Up */}
+                    className="block px-3 py-2 rounded-md text-sm text-white bg-blue-500 hover:bg-blue-600"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
             </ul>
           </motion.div>
         )}

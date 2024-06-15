@@ -6,12 +6,10 @@ import {
   IconBrandGoogle,
   IconBrandOnlyfans,
 } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/app/components/ui/navbar/input";
+import { Label } from "@/app/components/ui/navbar/label";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
-import useProfile from "@/app/hooks/useProfile";
 
 export function SignInForm() {
   const [error, setError] = useState("");
@@ -20,8 +18,6 @@ export function SignInForm() {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const router = useRouter();
-  const { loadProfile } = useProfile();
 
   const onSubmit = handleSubmit(async (data) => {
     const res = await signIn("credentials", {

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "../../../../libs/db";
 import bcrypt from "bcrypt";
+import { Resend } from "resend";
+import { EmailTemplate } from "../../../components/email-template";
+
+import crypto from "crypto";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,17 +15,17 @@ export async function POST(request: NextRequest) {
 
     if (!data.email || !data.username || !data.password) {
       return NextResponse.json(
-        { message: "Email and username and password are required" },
+        { message: "Email, username y password son requeridos" },
         { status: 400 }
       );
     }
 
-    if (data.password.length < 8) {
-      return NextResponse.json(
-        { message: "Your password es una verga" },
-        { status: 400 }
-      );
-    }
+    // if (data.password.length < 8) {
+    //   return NextResponse.json(
+    //     { message: "Tu contraseña debe tener al menos 8 caracteres" },
+    //     { status: 400 }
+    //   );
+    // }
 
     const mailFound = await db.user.findUnique({
       where: {
@@ -30,7 +36,7 @@ export async function POST(request: NextRequest) {
     if (mailFound)
       return NextResponse.json(
         {
-          message: "Mail already exists",
+          message: "El email ya existe",
         },
         { status: 400 }
       );
@@ -42,12 +48,13 @@ export async function POST(request: NextRequest) {
     if (usernameFound)
       return NextResponse.json(
         {
-          message: "Username already exists",
+          message: "El nombre de usuario ya existe",
         },
         { status: 400 }
       );
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
+    const emailConfirmationToken = crypto.randomBytes(32).toString("hex");
 
     const newUser = await db.user.create({
       data: {
@@ -56,6 +63,8 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         provider: "credentials",
         providerId: "1",
+        emailConfirmed: false,
+        emailConfirmationToken: emailConfirmationToken,
         profile: {
           create: {},
         },
@@ -72,12 +81,46 @@ export async function POST(request: NextRequest) {
       email: data.email,
     };
 
-    return NextResponse.json(userBack);
+    // Enviar correo de confirmación
+
+    const confirmationUrl = `http://localhost:3000/api/confirm-email?token=${emailConfirmationToken}`;
+
+    try {
+      const { data: emailData, error: emailError } = await resend.emails.send({
+        from: "Acme <onboarding@resend.dev>",
+        to: "maurolobo.ml@gmail.com",
+        subject: "Confirma tu email en Acme",
+        react: EmailTemplate({ firstName: data.username, confirmationUrl }),
+        text: "",
+      });
+
+      if (emailError) {
+        console.error("Error enviando el correo:", emailError);
+        return NextResponse.json(
+          {
+            message:
+              "Usuario creado, pero ocurrió un error al enviar el correo de confirmación",
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(userBack);
+    } catch (error) {
+      console.error("Error enviando el correo de confirmación:", error);
+      return NextResponse.json(
+        {
+          message:
+            "Usuario creado, pero ocurrió un error al enviar el correo de confirmación",
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error creando usuario:", error);
     return NextResponse.json(
       {
-        message: "Error creating user",
+        message: "Error creando usuario",
       },
       { status: 500 }
     );

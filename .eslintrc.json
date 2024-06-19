@@ -1,3 +1,10 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "plugins": ["typescript"],
+  "rules": {
+    "typescript/consistent-type-assertions": [
+      "error",
+      { "assertionStyle": "as", "objectLiteralTypeAssertions": "allow" }
+    ]
+  }
 }

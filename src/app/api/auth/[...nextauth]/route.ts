@@ -45,6 +45,9 @@ const handler = NextAuth({
           throw new Error("Your Email or Password is incorrect");
         const userId = userFound.id.toString();
 
+        if (!userFound.emailConfirmed)
+          throw new Error("Your email is not confirmed");
+
         const objRes = {
           email: userFound.email,
           name: userFound.username,
@@ -87,10 +90,10 @@ const handler = NextAuth({
   },
 
   pages: {
-    signIn: "/auth/login", // Ruta de inicio de sesión
-    signOut: "/auth/logout", // Ruta de cierre de sesión
-    error: "/auth/error", // Ruta de error
-    verifyRequest: "/auth/verify-request", // Ruta de verificación de solicitud
+    signIn: "/auth/login",
+    signOut: "/auth/logout",
+    error: "/auth/error",
+    verifyRequest: "/auth/verify-request",
   },
   secret: process.env.NEXTAUTH_SECRET,
 });

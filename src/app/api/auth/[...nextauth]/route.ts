@@ -2,9 +2,14 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import db from "../../../../libs/db";
 import bcrypt from "bcrypt";
+import GoogleProvider from "next-auth/providers/google";
 
 const handler = NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
       type: "credentials",
       credentials: {
@@ -34,7 +39,7 @@ const handler = NextAuth({
 
         const matchPassword = await bcrypt.compare(
           credentials.password,
-          userFound.password
+          userFound.password as string
         );
         if (!matchPassword)
           throw new Error("Your Email or Password is incorrect");
@@ -49,13 +54,44 @@ const handler = NextAuth({
       },
     }),
   ],
+
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google" && profile) {
+        const email = profile?.email;
+        let user = await db.user.findUnique({
+          where: { email },
+        });
+
+        if (!user) {
+          user = await db.user.create({
+            data: {
+              email: profile?.email as string,
+              username: profile.name || "",
+              provider: "google",
+              providerId: "2",
+              profile: {
+                create: {},
+              },
+            },
+          });
+        }
+        return true;
+      }
+
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      return baseUrl;
+    },
+  },
+
   pages: {
     signIn: "/auth/login", // Ruta de inicio de sesión
     signOut: "/auth/logout", // Ruta de cierre de sesión
     error: "/auth/error", // Ruta de error
     verifyRequest: "/auth/verify-request", // Ruta de verificación de solicitud
   },
-
   secret: process.env.NEXTAUTH_SECRET,
 });
 

@@ -96,13 +96,13 @@ const Navbar = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="absolute top-20 right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-20"
+              className="absolute top-20 right-0 mt-2 min-w-36  bg-white shadow-lg rounded-md py-2 z-20"
             >
               {session ? (
                 <>
                   <button
                     onClick={() => router.push("/profile")}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-100"
                   >
                     Profile
                   </button>

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "./label";
 import { Input } from "./input";
 import { cn } from "@/utils/cn";
@@ -10,6 +10,9 @@ import {
 } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
+import asd from "/public/a.jpg";
 
 export function SignupForm() {
   const {
@@ -19,6 +22,8 @@ export function SignupForm() {
   } = useForm();
 
   const router = useRouter();
+  const [registered, setRegistered] = useState(false);
+  const [error, setError] = useState("");
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.password !== data.confirmPassword) {
@@ -37,10 +42,16 @@ export function SignupForm() {
       },
     });
     const resJson = await res.json();
-    console.log(res);
+
     if (res.ok) {
-      router.push("/auth/login");
+      setRegistered(true);
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 2000);
+    } else {
+      setError(resJson.message);
     }
+
     console.log(errors);
   });
 
@@ -52,7 +63,36 @@ export function SignupForm() {
       <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
         Login to MI PAGINITA
       </p>
-
+      {registered ? (
+        <div
+          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          {registered && (
+            <span className="block sm:inline mr-2">
+              <svg
+                className="h-4 w-4 inline-block align-text-bottom"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9.293 14.293a1 1 0 0 1-1.414 0l-3-3a1 1 0 1 1 1.414-1.414L8 11.586l5.293-5.293a1 1 0 1 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0z"
+                />
+              </svg>
+              BIEN AHI LOCOOUUU....
+            </span>
+          )}
+        </div>
+      ) : (
+        ""
+      )}
+      {error && (
+        <>
+          <p>{error}</p>
+          <Image src={asd} alt="pija" width={100} height={100} />
+        </>
+      )}
       <form className="my-8" onSubmit={onSubmit}>
         <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
           <LabelInputContainer>
@@ -99,6 +139,7 @@ export function SignupForm() {
           <Input
             id="password"
             placeholder="••••••••"
+            autoComplete=""
             type="password"
             {...register("password", {
               required: {
@@ -120,6 +161,7 @@ export function SignupForm() {
             id="confirmPassword"
             placeholder="••••••••"
             type="password"
+            autoComplete=""
             {...register("confirmPassword", {
               required: {
                 value: true,
@@ -138,40 +180,41 @@ export function SignupForm() {
         </button>
 
         <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
-
-        <div className="flex flex-col space-y-4">
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              GitHub
-            </span>
-            <BottomGradient />
-          </button>
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              Google
-            </span>
-            <BottomGradient />
-          </button>
-          <button
-            className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-            type="submit"
-          >
-            <IconBrandOnlyfans className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-neutral-700 dark:text-neutral-300 text-sm">
-              OnlyFans
-            </span>
-            <BottomGradient />
-          </button>
-        </div>
       </form>
+      <div className="flex flex-col space-y-4">
+        <button
+          onClick={() => signIn("github")}
+          className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+          type="submit"
+        >
+          <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+          <span className="text-neutral-700 dark:text-neutral-300 text-sm">
+            GitHub
+          </span>
+          <BottomGradient />
+        </button>
+        <button
+          className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+          type="submit"
+          onClick={() => signIn("google")}
+        >
+          <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+          <span className="text-neutral-700 dark:text-neutral-300 text-sm">
+            Google
+          </span>
+          <BottomGradient />
+        </button>
+        <button
+          className=" relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+          type="submit"
+        >
+          <IconBrandOnlyfans className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+          <span className="text-neutral-700 dark:text-neutral-300 text-sm">
+            OnlyFans
+          </span>
+          <BottomGradient />
+        </button>
+      </div>
     </div>
   );
 }

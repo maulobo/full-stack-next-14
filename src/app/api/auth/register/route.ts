@@ -14,17 +14,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (data.password.length < 8) {
+      return NextResponse.json(
+        { message: "Your password es una verga" },
+        { status: 400 }
+      );
+    }
+
     const mailFound = await db.user.findUnique({
       where: {
         email: data.email,
       },
     });
-    console.log(mailFound);
 
     if (mailFound)
       return NextResponse.json(
         {
-          message: "Mail already exist",
+          message: "Mail already exists",
         },
         { status: 400 }
       );
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (usernameFound)
       return NextResponse.json(
         {
-          message: "user already exist",
+          message: "Username already exists",
         },
         { status: 400 }
       );
@@ -48,6 +54,8 @@ export async function POST(request: NextRequest) {
         username: data.username,
         email: data.email,
         password: hashedPassword,
+        provider: "credentials",
+        providerId: "1",
         profile: {
           create: {},
         },
@@ -59,8 +67,14 @@ export async function POST(request: NextRequest) {
 
     const { password: _, ...user } = newUser;
 
-    return NextResponse.json(user);
+    const userBack = {
+      username: data.username,
+      email: data.email,
+    };
+
+    return NextResponse.json(userBack);
   } catch (error) {
+    console.error("Error creating user:", error);
     return NextResponse.json(
       {
         message: "Error creating user",

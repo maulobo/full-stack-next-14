@@ -1,4 +1,3 @@
-// pages/api/resend-email.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/libs/db";
 import { Resend } from "resend";

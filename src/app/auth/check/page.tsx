@@ -18,7 +18,7 @@ const Check = () => {
     }
 
     try {
-      const response = await fetch("/api/resend-email", {
+      const response = await fetch("/api/auth/resend-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

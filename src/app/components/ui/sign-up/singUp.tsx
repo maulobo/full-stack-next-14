@@ -61,7 +61,7 @@ export function SignupForm() {
       loggedInUser
     );
 
-    const res2 = await fetch("/api/resend-email", {
+    const res2 = await fetch("/api/auth/resend-email", {
       method: "POST",
       body: JSON.stringify({
         email: loggedInUser,

@@ -21,9 +21,13 @@ model User {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt @default(now())
 
-  profile                Profile?                // Relación opcional con Profile
-  passwordResetTokens    PasswordResetToken[]    // Relación con PasswordResetToken
+  // Relación con Profile
+  profile                Profile?                          
+  passwordResetTokens    PasswordResetToken[]    
+
+  @@index([provider, providerId])
 }
+
 
 model Profile {
   id        Int       @id @default(autoincrement())

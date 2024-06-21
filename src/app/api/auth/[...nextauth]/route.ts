@@ -60,28 +60,31 @@ const handler = NextAuth({
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "github") {
-        const email = profile?.email;
-      }
       if (account?.provider === "google" && profile?.email) {
         const email = profile.email;
-        let user = await db.user.findUnique({
+        let existingUser = await db.user.findUnique({
           where: { email },
         });
 
-        if (!user) {
-          user = await db.user.create({
+        if (!existingUser) {
+          // Crear usuario si no existe
+          existingUser = await db.user.create({
             data: {
               email: profile.email,
               username: profile.name || "",
               provider: "google",
-              providerId: account.id as string,
-              profile: {
-                create: {
-                  firstName: profile.name,
-                  avatarUrl: profile.image,
-                },
-              },
+              providerId: account.providerAccountId as string,
+              emailConfirmed: true, // Email confirmado automáticamente para Google
+            },
+          });
+
+          // Crear perfil para el usuario nuevo
+          await db.profile.create({
+            data: {
+              userId: existingUser.id,
+              firstName: profile.name,
+              // Puedes ajustar según la disponibilidad de la imagen en el perfil de Google
+              avatarUrl: profile.image || undefined,
             },
           });
         }
@@ -89,6 +92,7 @@ const handler = NextAuth({
 
       return true;
     },
+
     async session({ session, token }) {
       if (token) {
         console.log(token);
@@ -108,12 +112,12 @@ const handler = NextAuth({
       return token;
     },
 
-    // async redirect({ url, baseUrl }) {
-    //   if (url.startsWith("/auth")) {
-    //     return url;
-    //   }
-    //   return baseUrl + "/confirm-email";
-    // },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/auth")) {
+        return url;
+      }
+      return baseUrl + "/";
+    },
   },
 
   pages: {

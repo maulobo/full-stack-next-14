@@ -10,6 +10,7 @@ import { Input } from "@/app/components/ui/navbar/input";
 import { Label } from "@/app/components/ui/navbar/label";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 
 export function SignInForm() {
   const [error, setError] = useState("");
@@ -146,6 +147,15 @@ export function SignInForm() {
           </button>
         </div>
       </form>
+      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-4">
+        Forgot your password?{" "}
+        <Link
+          href="/auth/forgot-password"
+          className="text-blue-600 hover:underline"
+        >
+          Click here
+        </Link>
+      </p>
     </div>
   );
 }

@@ -33,7 +33,7 @@ export const Profile = () => {
         const fetchProfile = async (session: Session) => {
           if (session) {
             const user = session.user?.name;
-            const response = await fetch(`/api/profile?user=${user}`);
+            const response = await fetch(`/api/auth/profile?user=${user}`);
 
             if (response.ok) {
               const data = await response.json();

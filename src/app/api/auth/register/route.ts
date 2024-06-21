@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // Enviar correo de confirmación
 
-    const confirmationUrl = `http://localhost:3000/api/confirm-email?token=${emailConfirmationToken}`;
+    const confirmationUrl = `http://localhost:3000/api/auth/confirm-email?token=${emailConfirmationToken}`;
 
     try {
       const { data: emailData, error: emailError } = await resend.emails.send({

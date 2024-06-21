@@ -1,5 +1,5 @@
 "use client";
-import { SignupForm } from "@/app/components/ui/form/singUp";
+import { SignupForm } from "@/app/components/ui/sign-up/singUp";
 
 function RegisterPage() {
   return (

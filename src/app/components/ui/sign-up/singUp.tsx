@@ -1,18 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Label } from "./label";
 import { Input } from "./input";
 import { cn } from "@/utils/cn";
+import { useForm } from "react-hook-form";
+
+import { signIn } from "next-auth/react";
+import Image from "next/image";
+import asd from "/public/a.jpg";
 import {
   IconBrandGithub,
   IconBrandGoogle,
   IconBrandOnlyfans,
 } from "@tabler/icons-react";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import Image from "next/image";
-import asd from "/public/a.jpg";
 
 export function SignupForm() {
   const {
@@ -21,11 +21,13 @@ export function SignupForm() {
     formState: { errors },
   } = useForm();
 
-  const router = useRouter();
   const [registered, setRegistered] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   const onSubmit = handleSubmit(async (data) => {
+    setError("");
     if (data.password !== data.confirmPassword) {
       return alert("Passwords do not match");
     }
@@ -42,47 +44,68 @@ export function SignupForm() {
       },
     });
     const resJson = await res.json();
+    setLoggedInUser(resJson.email);
+    console.log(resJson.email);
 
-    if (res.ok) {
+    if (res.ok && resJson) {
       setRegistered(true);
-      setTimeout(() => {
-        router.push("/auth/login");
-      }, 2000);
+      setLoading(true);
     } else {
       setError(resJson.message);
     }
-
-    console.log(errors);
   });
 
+  const handleResendConfirmation = async () => {
+    console.log(
+      "Logged in user email in handleResendConfirmation:",
+      loggedInUser
+    );
+
+    const res2 = await fetch("/api/resend-email", {
+      method: "POST",
+      body: JSON.stringify({
+        email: loggedInUser,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(res2);
+    const resJson2 = await res2.json();
+    console.log(resJson2);
+
+    if (res2.ok) {
+      alert("Email confirmation resent successfully");
+    } else {
+      console.log("error");
+    }
+  };
+
   return (
-    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-blue-300 dark:bg-black shadow-xl">
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
-        Welcome to Mau Lobo APP
+        Welcome to APPOBO
       </h2>
       <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
-        Login to MI PAGINITA
+        SIGNUP
       </p>
       {registered ? (
         <div
           className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
           role="alert"
         >
-          {registered && (
-            <span className="block sm:inline mr-2">
-              <svg
-                className="h-4 w-4 inline-block align-text-bottom"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9.293 14.293a1 1 0 0 1-1.414 0l-3-3a1 1 0 1 1 1.414-1.414L8 11.586l5.293-5.293a1 1 0 1 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0z"
-                />
-              </svg>
-              BIEN AHI LOCOOUUU....
-            </span>
-          )}
+          <span className="block sm:inline mr-2">
+            Check your email and confirm your account! If you haven't received
+            the email, you can{" "}
+            <button
+              className="underline text-blue-500"
+              onClick={handleResendConfirmation}
+            >
+              resend confirmation
+            </button>
+            .
+          </span>
         </div>
       ) : (
         ""

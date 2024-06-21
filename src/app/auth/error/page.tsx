@@ -1,6 +1,5 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 
 const ErrorPage = () => {
   let confirmedError = false;

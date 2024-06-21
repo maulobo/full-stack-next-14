@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.redirect(new URL("/confirm-email", request.url));
+    return NextResponse.redirect(new URL("/confirmed-email", request.url));
   } catch (error) {
     console.error("Error confirmando email:", error);
     return NextResponse.redirect(

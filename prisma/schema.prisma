@@ -10,18 +10,19 @@ datasource db {
 }
 
 model User {
-  id                   Int       @id @default(autoincrement())
-  email                String    @unique
-  password             String?
-  username             String    @unique
-  provider             String
-  providerId           String
-  emailConfirmed       Boolean   @default(false)
-  emailConfirmationToken String?  @unique
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt @default(now())
+  id                     Int                     @id @default(autoincrement())
+  email                  String                  @unique
+  password               String?
+  username               String                  @unique
+  provider               String
+  providerId             String
+  emailConfirmed         Boolean                 @default(false)
+  emailConfirmationToken String?                 @unique
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt @default(now())
 
-  profile              Profile?  // Relación opcional con Profile
+  profile                Profile?                // Relación opcional con Profile
+  passwordResetTokens    PasswordResetToken[]    // Relación con PasswordResetToken
 }
 
 model Profile {
@@ -36,4 +37,14 @@ model Profile {
   // Relación con User
   user      User      @relation(fields: [userId], references: [id])
   userId    Int       @unique
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  createdAt DateTime  @default(now())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }

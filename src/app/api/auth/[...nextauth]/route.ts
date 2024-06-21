@@ -60,8 +60,11 @@ const handler = NextAuth({
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google" && profile) {
+      if (account?.provider === "github") {
         const email = profile?.email;
+      }
+      if (account?.provider === "google" && profile?.email) {
+        const email = profile.email;
         let user = await db.user.findUnique({
           where: { email },
         });
@@ -69,31 +72,55 @@ const handler = NextAuth({
         if (!user) {
           user = await db.user.create({
             data: {
-              email: profile?.email as string,
+              email: profile.email,
               username: profile.name || "",
               provider: "google",
-              providerId: "2",
+              providerId: account.id as string,
               profile: {
-                create: {},
+                create: {
+                  firstName: profile.name,
+                  avatarUrl: profile.image,
+                },
               },
             },
           });
         }
-        return true;
       }
 
       return true;
     },
-    async redirect({ url, baseUrl }) {
-      return baseUrl;
+    async session({ session, token }) {
+      if (token) {
+        console.log(token);
+        session.user.email = token.email;
+        session.user.name = token.name;
+      }
+      return session;
     },
+
+    async jwt({ token, user }) {
+      if (user) {
+        console.log(user);
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+
+    // async redirect({ url, baseUrl }) {
+    //   if (url.startsWith("/auth")) {
+    //     return url;
+    //   }
+    //   return baseUrl + "/confirm-email";
+    // },
   },
 
   pages: {
     signIn: "/auth/login",
     signOut: "/auth/logout",
     error: "/auth/error",
-    verifyRequest: "/auth/verify-request",
+    verifyRequest: "/auth/confirm-email",
   },
   secret: process.env.NEXTAUTH_SECRET,
 });

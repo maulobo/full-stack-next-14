@@ -31,10 +31,10 @@ const Navbar = () => {
   // Manejar el cierre del menú de usuario cuando se hace clic fuera de él
 
   return (
-    <nav className="relative z-10 bg-white shadow-md flex justify-between items-center p-4">
+    <nav className="relative z-10  shadow-md flex justify-between items-center p-4">
       <div className="flex items-center">
         <button
-          className="md:hidden block text-gray-700 focus:outline-none"
+          className="md:hidden block focus:outline-none"
           onClick={toggleMenu}
         >
           <svg
@@ -62,7 +62,7 @@ const Navbar = () => {
         {session ? (
           <button
             onClick={toggleUserMenu}
-            className="text-gray-700 focus:outline-none avatar-button"
+            className="focus:outline-none avatar-button"
           >
             <Avatar>
               <AvatarImage src={profile?.profile?.avatarUrl} />
@@ -73,7 +73,7 @@ const Navbar = () => {
           <>
             <button
               onClick={() => signIn()}
-              className="px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-700"
+              className="px-3 py-2 rounded-md text-sm hover:bg-gray-100 hover:text-gray-700"
             >
               Sign In
             </button>
